@@ -67,25 +67,55 @@
 				<!-- Footer -->
 					<footer id="footer">
 						<section>
-							<form method="post" action="#">
-								<div class="fields">
-									<div class="field">
-										<label for="name">Neved</label>
-										<input type="text" name="name" id="name" />
-									</div>
-									<div class="field">
-										<label for="email">Email-címed</label>
-										<input type="text" name="email" id="email" />
-									</div>
-									<div class="field">
-										<label for="message">Üzeneted</label>
-										<textarea name="message" id="message" rows="3"></textarea>
-									</div>
-								</div>
-								<ul class="actions">
-									<li><input type="submit" value="KÜLDÉS" /></li>
-								</ul>
-							</form>
+							<form id="contactForm" method="POST" action="https://formspree.io/f/mredlvgp">
+
+	<div class="fields">
+
+		<div class="field">
+			<label for="name">Neved</label>
+			<input type="text" name="name" id="name" required />
+		</div>
+
+		<div class="field">
+			<label for="email">Email-címed</label>
+			<input type="email" name="email" id="email" required />
+		</div>
+
+		<div class="field">
+			<label for="message">Üzeneted</label>
+			<textarea name="message" id="message" rows="3" required></textarea>
+		</div>
+
+	</div>
+
+	<ul class="actions">
+		<li>
+			<input type="submit" value="KÜLDÉS" />
+		</li>
+	</ul>
+
+</form>
+
+<script>
+document.getElementById("contactForm").addEventListener("submit", async function(e) {
+	e.preventDefault();
+
+	const formData = new FormData(this);
+
+	try {
+		await fetch(this.action, {
+			method: "POST",
+			body: formData,
+			headers: { "Accept": "application/json" }
+		});
+
+		window.location.href = "koszonom.html";
+
+	} catch (error) {
+		alert("Hiba történt az elküldés során.");
+	}
+});
+</script>
 						</section>
 						<section class="split contact">
 							
