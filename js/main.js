@@ -295,6 +295,12 @@ function runBootSequence() {
 
         setTimeout(runBootSequence, delay);
     } else {
+        // INTENTIONAL DELAYED CRASH FOR TESTING
+        setTimeout(() => {
+            throw new Error("X11 Server segmentation fault. Core dumped.");
+        }, 800);
+        
+        /* Original success code (commented out for test)
         setTimeout(() => {
             bootScreen.style.opacity = '0';
             bootScreen.style.transition = 'opacity 0.4s ease-out';
@@ -302,6 +308,7 @@ function runBootSequence() {
                 bootScreen.style.display = 'none';
             }, 400);
         }, 300);
+        */
     }
 }
 
@@ -311,4 +318,4 @@ document.addEventListener("DOMContentLoaded", () => {
 
 let weatherChart = null;
 
-throw new Error('Simulated Kernel Panic: manual test trigger');
+

@@ -18,8 +18,15 @@
                 bootScreen.style.opacity = '1';
                 
                 let errDiv = document.createElement('div');
-                errDiv.innerHTML = "<br>[ <span style='color:red'>FAILED</span> ] System crashed.<br><span style='color:red'>" + (e.message || "Unknown Error") + "</span><br>Kernel panic - not syncing: Fatal exception in interrupt<br>Entering rescue mode...<br>Type 'reboot' to try again.<br><br><span style='color:#00ff41'>root@rescue:~#</span> <input type='text' id='rescue-input' autocomplete='off' spellcheck='false' autofocus style='background:transparent; border:none; color:#00ff41; font-family:monospace; outline:none; font-size:inherit; width: 100px;'>";
-                bootText.appendChild(errDiv);
+                let hexDump = "";
+                for(let i=0; i<8; i++) {
+                    hexDump += "[ <span style='color:red'>FATAL</span> ] CPU:0 PID:1 Comm: init Not tainted 6.8.0-generic<br>";
+                    hexDump += "<span style='color:red'>RIP: 0010:native_machine_halt+0x12/0x20</span><br>";
+                    hexDump += "<span style='color:red'>Code: 00 00 00 00 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 f3 0f 1e fa 55 48 89 e5 fb f4 5d c3</span><br>";
+                }
+                
+                errDiv.innerHTML = hexDump + "<br>[ <span style='color:red'>FAILED</span> ] System crashed.<br><span style='color:red'>" + (e.message || "Unknown Error") + "</span><br>Kernel panic - not syncing: Fatal exception in interrupt<br>Entering rescue mode...<br>Type 'reboot' to try again.<br><br><span style='color:#00ff41'>root@rescue:~#</span> <input type='text' id='rescue-input' autocomplete='off' spellcheck='false' autofocus style='background:transparent; border:none; color:#00ff41; font-family:monospace; outline:none; font-size:inherit; width: 100px;'>";
+                bootText.appendChild(errDiv); bootText.scrollTop = bootText.scrollHeight;
                 
                 // Stop any typing animations
                 window.bootHalted = true;
