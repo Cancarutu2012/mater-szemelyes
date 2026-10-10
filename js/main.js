@@ -1,7 +1,3 @@
-throw new Error('Simulated Kernel Panic: manual test trigger')
-
-
-
 
 
 
