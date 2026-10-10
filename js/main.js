@@ -277,6 +277,8 @@ const bootSequence = [
 let bootIndex = 0;
 
 function runBootSequence() {
+    if (window.bootHalted) return;
+    
     if (bootIndex < bootSequence.length) {
         let p = document.createElement('div');
         p.innerHTML = bootSequence[bootIndex];
@@ -293,51 +295,13 @@ function runBootSequence() {
 
         setTimeout(runBootSequence, delay);
     } else {
-        // If not rebooted yet, simulate the error!
-        if (!sessionStorage.getItem('rebooted')) {
+        setTimeout(() => {
+            bootScreen.style.opacity = '0';
+            bootScreen.style.transition = 'opacity 0.4s ease-out';
             setTimeout(() => {
-                let errDiv = document.createElement('div');
-                errDiv.innerHTML = "<br>[ <span style='color:red'>FAILED</span> ] Failed to start Graphical Interface.<br><span style='color:red'>Uncaught SyntaxError: Identifier 'weatherChart' has already been declared</span><br>Kernel panic - not syncing: Fatal exception in interrupt<br>Entering rescue mode...<br>Type 'reboot' to try again.<br><br><span class='neon-green'>root@rescue:~#</span> <input type='text' id='rescue-input' autocomplete='off' spellcheck='false' autofocus style='background:transparent; border:none; color:var(--neon-green); font-family:var(--font-mono); outline:none; font-size:inherit; width: 100px;'>";
-                bootText.appendChild(errDiv);
-                
-                const input = document.getElementById('rescue-input');
-                input.focus();
-                
-                // Keep focus
-                input.addEventListener('blur', () => input.focus());
-                
-                input.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter') {
-                        const val = input.value.trim().toLowerCase();
-                        if (val === 'reboot') {
-                            input.disabled = true;
-                            let rebootLog = document.createElement('div');
-                            rebootLog.innerHTML = "<br>[ <span class='cyan'>INFO</span> ] Restarting system...<br>[ <span class='neon-green'> OK </span> ] Unmounted local filesystems.<br>[ <span class='neon-green'> OK </span> ] Reached target Shutdown.<br>System halted. Rebooting...";
-                            bootText.appendChild(rebootLog);
-                            sessionStorage.setItem('rebooted', 'true');
-                            setTimeout(() => {
-                                location.reload();
-                            }, 1500);
-                        } else {
-                            let badCmd = document.createElement('div');
-                            badCmd.innerHTML = `bash: ${val}: command not found<br><span class='neon-green'>root@rescue:~#</span> `;
-                            bootText.appendChild(badCmd);
-                            input.value = '';
-                            errDiv.appendChild(input);
-                            input.focus();
-                        }
-                    }
-                });
-            }, 500);
-        } else {
-            setTimeout(() => {
-                bootScreen.style.opacity = '0';
-                bootScreen.style.transition = 'opacity 0.4s ease-out';
-                setTimeout(() => {
-                    bootScreen.style.display = 'none';
-                }, 400);
-            }, 300);
-        }
+                bootScreen.style.display = 'none';
+            }, 400);
+        }, 300);
     }
 }
 

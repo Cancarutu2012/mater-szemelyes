@@ -7,6 +7,52 @@
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        window.siteCrashed = false;
+        window.addEventListener('error', function(e) {
+            window.siteCrashed = true;
+            const bootScreen = document.getElementById('boot-screen');
+            const bootText = document.getElementById('boot-text');
+            if (bootScreen && bootText) {
+                bootScreen.style.display = 'flex';
+                bootScreen.style.opacity = '1';
+                
+                let errDiv = document.createElement('div');
+                errDiv.innerHTML = "<br>[ <span style='color:red'>FAILED</span> ] System crashed.<br><span style='color:red'>" + (e.message || "Unknown Error") + "</span><br>Kernel panic - not syncing: Fatal exception in interrupt<br>Entering rescue mode...<br>Type 'reboot' to try again.<br><br><span style='color:#00ff41'>root@rescue:~#</span> <input type='text' id='rescue-input' autocomplete='off' spellcheck='false' autofocus style='background:transparent; border:none; color:#00ff41; font-family:monospace; outline:none; font-size:inherit; width: 100px;'>";
+                bootText.appendChild(errDiv);
+                
+                // Stop any typing animations
+                window.bootHalted = true;
+                
+                setTimeout(() => {
+                    const input = document.getElementById('rescue-input');
+                    if (input) {
+                        input.focus();
+                        input.addEventListener('blur', () => input.focus());
+                        input.addEventListener('keydown', (ev) => {
+                            if (ev.key === 'Enter') {
+                                const val = input.value.trim().toLowerCase();
+                                if (val === 'reboot') {
+                                    input.disabled = true;
+                                    let rebootLog = document.createElement('div');
+                                    rebootLog.innerHTML = "<br>[ <span style='color:#00ffff'>INFO</span> ] Restarting system...<br>[ <span style='color:#00ff41'> OK </span> ] Unmounted local filesystems.<br>System halted. Rebooting...";
+                                    bootText.appendChild(rebootLog);
+                                    setTimeout(() => { location.reload(); }, 1500);
+                                } else {
+                                    let badCmd = document.createElement('div');
+                                    badCmd.innerHTML = `bash: ${val}: command not found<br><span style='color:#00ff41'>root@rescue:~#</span> `;
+                                    bootText.appendChild(badCmd);
+                                    input.value = '';
+                                    errDiv.appendChild(input);
+                                    input.focus();
+                                }
+                            }
+                        });
+                    }
+                }, 100);
+            }
+        });
+    </script>
 </head>
 <body>
     <div id="boot-screen" class="boot-screen">
