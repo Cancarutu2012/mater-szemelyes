@@ -1,3 +1,10 @@
+throw new Error('Simulated Kernel Panic: manual test trigger')
+
+
+
+
+
+
 // System Clock
 function updateClock() {
     const now = new Date();
