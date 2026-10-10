@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Radetzky Máté - Terminal Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div id="boot-screen" class="boot-screen">
+        <div id="boot-text"></div>
+        <div class="boot-cursor"></div>
+    </div>
+    <div class="scanlines"></div>
+    <div class="noise"></div>
+    <div id="app" class="terminal-container">
+        
+        <header class="terminal-header">
+            <div class="status-bar">
+                <span class="status-item">sys.status: <span class="neon-green">ONLINE</span></span>
+                <span class="status-item">usr: radetzky</span>
+                <span class="status-item" id="sys-time">00:00:00</span>
+            </div>
+            <nav class="terminal-nav">
+                <button class="nav-btn active" data-target="about">./about.sh</button>
+                <button class="nav-btn" data-target="projects">./projects.sh</button>
+                <button class="nav-btn" data-target="weather">./weather.sh</button>
+                <button class="nav-btn" data-target="contact">./contact.sh</button>
+            </nav>
+        </header>
+
+        <main class="terminal-content">
+            <!-- SECTION: ABOUT -->
+            <section id="about" class="active-section">
+                <div class="cmd-line">
+                    <span class="prompt">radetzky@homelab:~$</span> cat about.txt
+                </div>
+                <div class="output">
+                    <h1 class="glitch" data-text="Radetzky Máté">Radetzky Máté</h1>
+                    <p class="bio">
+                        Büszkén mondhatom, hogy a Ciszterci Szent István Gimnázium tanulója vagyok. Az iskola, ahol tanulok, nemcsak a tudásról, hanem a közösségről, a hagyományokról és az értékekről is szól.
+                        <br><br>
+                        Már kiskorom óta érdekel az informatika világa. Szeretek programozni, és különösen örömömet lelem abban, ha egy problémára sikerül megoldást találni. Részt vettem informatikai versenyeken és a Kazinczy Szép Magyar Beszéd versenyen is.
+                    </p>
+                    <div class="skills-matrix">
+                        <div class="skill-group">
+                            <span class="skill-title">[ MODULES ]</span>
+                            <a href="#" class="skill nav-link-inline" data-target="projects">Projektek</a>
+                            <a href="#" class="skill nav-link-inline" data-target="weather">Időjárás-állomás</a>
+                            <a href="#" class="skill nav-link-inline" data-target="contact">Kapcsolat</a>
+                        </div>
+                        <div class="skill-group">
+                            <span class="skill-title">[ PROJECTS ]</span>
+                            <a href="https://github.com/materadetzky/pergamen" target="_blank" class="skill">Pergamen Napló</a>
+                            <a href="https://github.com/materadetzky/mater-szemelyes/releases/download/TRACKER/hyperclean_setup.exe" class="skill">Hyperclean OS</a>
+                            <a href="https://github.com/materadetzky/mater-szemelyes/releases/download/TRACKER/liquidfocusnew.apk" class="skill">Liquid Focus</a>
+                            <a href="https://github.com/materadetzky/trop_plus" target="_blank" class="skill">Trop+</a>
+                        </div>
+                        <div class="skill-group">
+                            <span class="skill-title">[ SOCIAL ]</span>
+                            <a href="https://github.com/materadetzky" target="_blank" class="skill">GitHub</a>
+                            <a href="https://www.facebook.com/materadetzky12/" target="_blank" class="skill">Facebook</a>
+                            <a href="https://www.instagram.com/mate.radetzky/" target="_blank" class="skill">Instagram</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION: PROJECTS -->
+            <section id="projects">
+                <div class="cmd-line">
+                    <span class="prompt">radetzky@homelab:~$</span> ls -l ./projects
+                </div>
+                <div class="output">
+                    <div class="projects-grid">
+                        
+                        <div class="project-card">
+                            <div class="card-header">
+                                <h3>Pergamen Napló v2.5</h3>
+                                <span class="badge cyan">iOS</span>
+                            </div>
+                            <p>Egy szép, Material 3 designnal rendelkező kliens-alkalmazás az e-Kréta rendszerhez. iOS-re és Androidra is elérhető.</p>
+                            <div class="card-footer">
+                                <span class="date">2026-10-02</span>
+                                <a href="https://github.com/materadetzky/pergamen" target="_blank" class="action-link">[ VIEW REPO ]</a>
+                            </div>
+                        </div>
+
+                        <div class="project-card">
+                            <div class="card-header">
+                                <h3>Hyperclean OS App</h3>
+                                <span class="badge neon-green">Windows</span>
+                            </div>
+                            <p>Rendszer-optimalizáló eszköz. Optimalizálás, apptelepítés vagy törlés - mindent egy kattintásnyira. Win10+ kompatibilis.</p>
+                            <div class="card-footer">
+                                <span class="date">2026-05-20</span>
+                                <a href="https://github.com/materadetzky/mater-szemelyes/releases/download/TRACKER/hyperclean_setup.exe" class="action-link">[ DOWNLOAD EXE ]</a>
+                            </div>
+                        </div>
+
+                        <div class="project-card">
+                            <div class="card-header">
+                                <h3>Liquid Focus</h3>
+                                <span class="badge cyan">Android</span>
+                            </div>
+                            <p>Egy ingyenes, reklámmentes fókusz-időzítő app Androidra, amivel hatékonyabban tudsz tanulni vagy dolgozni.</p>
+                            <div class="card-footer">
+                                <span class="date">2026-10-01</span>
+                                <a href="https://github.com/materadetzky/mater-szemelyes/releases/download/TRACKER/liquidfocusnew.apk" class="action-link">[ DOWNLOAD APK ]</a>
+                            </div>
+                        </div>
+
+                        <div class="project-card">
+                            <div class="card-header">
+                                <h3>My QR World</h3>
+                                <span class="badge cyan">Android</span>
+                            </div>
+                            <p>Ingyenes, reklámmentes QR kód olvasó és generáló alkalmazás Android telefonokra.</p>
+                            <div class="card-footer">
+                                <span class="date">2026-06-30</span>
+                                <a href="https://github.com/materadetzky/mater-szemelyes/releases/download/TRACKER/my-qr-world.apk" class="action-link">[ DOWNLOAD APK ]</a>
+                            </div>
+                        </div>
+                        <div class="project-card">
+                            <div class="card-header">
+                                <h3>Trop+</h3>
+                                <span class="badge cyan">iOS</span>
+                            </div>
+                            <p>Egy ingyenes zenelejátszó alkalmazás (Music Player) iOS rendszerre.</p>
+                            <div class="card-footer">
+                                <span class="date">2026-10-10</span>
+                                <a href="https://github.com/materadetzky/trop_plus" target="_blank" class="action-link">[ VIEW REPO ]</a>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION: WEATHER -->
+            <section id="weather">
+                <div class="cmd-line">
+                    <span class="prompt">radetzky@homelab:~$</span> ./bin/fetch_weather_data --live
+                </div>
+                <div class="output">
+                    <div id="weather-loader" class="blinking">Establishing link with Ecowitt API...</div>
+                    <div id="weather-dashboard" style="display: none;">
+                        <div class="weather-grid" id="weather-metrics">
+                            <!-- Populated via JS -->
+                        </div>
+                        <div class="viz-section">
+                            <div class="cmd-line mt-4">
+                                <span class="prompt">radetzky@homelab:~$</span> ./bin/render_chart --target="temp"
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="weatherChart"></canvas>
+                            </div>
+                            <p class="sys-note">* Showing simulated historical trends anchored to live readings.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION: CONTACT -->
+            <section id="contact">
+                <div class="cmd-line">
+                    <span class="prompt">radetzky@homelab:~$</span> cat ~/.contacts
+                </div>
+                <div class="output">
+                    <div class="contact-panel">
+                        <div class="contact-info">
+                            <h3>[ COMM_LINKS ]</h3>
+                            <ul>
+                                <li>Email: <a href="mailto:radetzky.mate.2012@gmail.com" class="cyan">radetzky.mate.2012@gmail.com</a></li>
+                                <li>GitHub: <a href="https://github.com/materadetzky" target="_blank" class="cyan">github.com/materadetzky</a></li>
+                                <li>Facebook: <a href="https://www.facebook.com/materadetzky12/" target="_blank" class="cyan">@materadetzky12</a></li>
+                                <li>Instagram: <a href="https://www.instagram.com/mate.radetzky/" target="_blank" class="cyan">@mate.radetzky</a></li>
+                            </ul>
+                        </div>
+                        <div class="contact-form-container">
+                            <h3>[ SEND_TRANSMISSION ]</h3>
+                            <form id="terminalContactForm" action="https://formspree.io/f/mredlvgp" method="POST">
+                                <div class="input-group">
+                                    <label>name:</label>
+                                    <input type="text" name="name" required class="term-input">
+                                </div>
+                                <div class="input-group">
+                                    <label>email:</label>
+                                    <input type="email" name="email" required class="term-input">
+                                </div>
+                                <div class="input-group">
+                                    <label>message:</label>
+                                    <textarea name="message" rows="4" required class="term-input"></textarea>
+                                </div>
+                                <button type="submit" class="term-submit-btn">[ EXECUTE ]</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="js/main.js"></script>
+</body>
+</html>
