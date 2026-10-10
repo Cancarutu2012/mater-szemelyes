@@ -45,7 +45,7 @@ document.querySelectorAll('.nav-link-inline').forEach(link => {
 
 // Weather Dashboard Logic
 let weatherLoaded = false;
-let weatherChart = null;
+
 
 const WEATHER_URL = "https://api.ecowitt.net/api/v3/device/real_time"
  + "?application_key=D55FDBC9235F9886E2D7715A7B0E8149"
@@ -109,7 +109,7 @@ async function fetchWeatherData() {
 }
 
 // Data Visualization (Chart.js)
-let weatherChart = null;
+
 
 function getEcowittDateStr(date) {
     const pad = (n) => n.toString().padStart(2, '0');
@@ -283,11 +283,8 @@ function runBootSequence() {
         bootText.appendChild(p);
         
         bootIndex++;
-        
-        // Fast random delay for systemd style (10ms to 40ms)
         let delay = Math.random() * 30 + 10;
         
-        // Pause slightly longer at network or process
         if (bootSequence[bootIndex-1].includes("INFO") || bootSequence[bootIndex-1].includes("PROCESS")) {
             delay = 200;
         } else if (bootSequence[bootIndex-1].includes("radetzky login:")) {
@@ -296,16 +293,56 @@ function runBootSequence() {
 
         setTimeout(runBootSequence, delay);
     } else {
-        setTimeout(() => {
-            bootScreen.style.opacity = '0';
-            bootScreen.style.transition = 'opacity 0.4s ease-out';
+        // If not rebooted yet, simulate the error!
+        if (!sessionStorage.getItem('rebooted')) {
             setTimeout(() => {
-                bootScreen.style.display = 'none';
-            }, 400);
-        }, 300);
+                let errDiv = document.createElement('div');
+                errDiv.innerHTML = "<br>[ <span style='color:red'>FAILED</span> ] Failed to start Graphical Interface.<br><span style='color:red'>Uncaught SyntaxError: Identifier 'weatherChart' has already been declared</span><br>Kernel panic - not syncing: Fatal exception in interrupt<br>Entering rescue mode...<br>Type 'reboot' to try again.<br><br><span class='neon-green'>root@rescue:~#</span> <input type='text' id='rescue-input' autocomplete='off' spellcheck='false' autofocus style='background:transparent; border:none; color:var(--neon-green); font-family:var(--font-mono); outline:none; font-size:inherit; width: 100px;'>";
+                bootText.appendChild(errDiv);
+                
+                const input = document.getElementById('rescue-input');
+                input.focus();
+                
+                // Keep focus
+                input.addEventListener('blur', () => input.focus());
+                
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        const val = input.value.trim().toLowerCase();
+                        if (val === 'reboot') {
+                            input.disabled = true;
+                            let rebootLog = document.createElement('div');
+                            rebootLog.innerHTML = "<br>[ <span class='cyan'>INFO</span> ] Restarting system...<br>[ <span class='neon-green'> OK </span> ] Unmounted local filesystems.<br>[ <span class='neon-green'> OK </span> ] Reached target Shutdown.<br>System halted. Rebooting...";
+                            bootText.appendChild(rebootLog);
+                            sessionStorage.setItem('rebooted', 'true');
+                            setTimeout(() => {
+                                location.reload();
+                            }, 1500);
+                        } else {
+                            let badCmd = document.createElement('div');
+                            badCmd.innerHTML = `bash: ${val}: command not found<br><span class='neon-green'>root@rescue:~#</span> `;
+                            bootText.appendChild(badCmd);
+                            input.value = '';
+                            errDiv.appendChild(input);
+                            input.focus();
+                        }
+                    }
+                });
+            }, 500);
+        } else {
+            setTimeout(() => {
+                bootScreen.style.opacity = '0';
+                bootScreen.style.transition = 'opacity 0.4s ease-out';
+                setTimeout(() => {
+                    bootScreen.style.display = 'none';
+                }, 400);
+            }, 300);
+        }
     }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
     setTimeout(runBootSequence, 200);
 });
+
+let weatherChart = null;
