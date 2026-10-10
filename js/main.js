@@ -69,7 +69,9 @@ function createWeatherCard(label, value, unit) {
 function initWeather() {
     weatherLoaded = true;
     fetchWeatherData();
-    setInterval(fetchWeatherData, 30000); // refresh every 30s
+    fetchHistoricalData();
+    setInterval(fetchWeatherData, 30000); // refresh current reading every 30s
+    setInterval(fetchHistoricalData, 300000); // refresh graph every 5 mins
 }
 
 async function fetchWeatherData() {
@@ -94,10 +96,6 @@ async function fetchWeatherData() {
             // Hide loader, show dashboard
             document.getElementById('weather-loader').style.display = 'none';
             document.getElementById('weather-dashboard').style.display = 'block';
-
-            // Update Chart
-            const currentTemp = parseFloat(d.outdoor.temperature.value);
-            updateChart(currentTemp);
         } else {
             document.getElementById('weather-loader').textContent = "ERROR: Failed to parse sensor data.";
             document.getElementById('weather-loader').style.color = "red";
@@ -111,39 +109,50 @@ async function fetchWeatherData() {
 }
 
 // Data Visualization (Chart.js)
-// We'll generate some realistic historical data and append the live data
-const ctx = document.getElementById('weatherChart').getContext('2d');
-const simulatedLabels = [];
-const simulatedData = [];
+let weatherChart = null;
 
-// Generate last 10 hours of simulated data
-const now = new Date();
-for(let i = 10; i > 0; i--) {
-    let t = new Date(now.getTime() - i * 60 * 60 * 1000);
-    simulatedLabels.push(t.getHours() + ":00");
-    // Simulate temp around 15-25 C
-    let simTemp = 20 + Math.sin(i) * 5 + (Math.random() * 2 - 1);
-    simulatedData.push(simTemp.toFixed(1));
+function getEcowittDateStr(date) {
+    const pad = (n) => n.toString().padStart(2, '0');
+    return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
 }
 
-function updateChart(liveTemp) {
-    const t = new Date();
-    const timeLabel = t.getHours() + ":" + String(t.getMinutes()).padStart(2, '0');
+async function fetchHistoricalData() {
+    const now = new Date();
+    const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
     
-    // Add live data point
-    if (simulatedLabels.length > 10 && simulatedLabels[simulatedLabels.length-1] !== timeLabel) {
-       // Keep array size reasonable
-       if (simulatedLabels.length > 15) {
-           simulatedLabels.shift();
-           simulatedData.shift();
-       }
-       simulatedLabels.push(timeLabel);
-       simulatedData.push(liveTemp);
-    } else {
-       // Just update the latest if we are calling multiple times in the same minute
-       simulatedLabels[simulatedLabels.length - 1] = timeLabel;
-       simulatedData[simulatedData.length - 1] = liveTemp;
+    const endDateStr = encodeURIComponent(getEcowittDateStr(now));
+    const startDateStr = encodeURIComponent(getEcowittDateStr(oneHourAgo));
+    
+    const HIST_URL = `https://api.ecowitt.net/api/v3/device/history?application_key=D55FDBC9235F9886E2D7715A7B0E8149&api_key=5f4fee86-c4b9-476b-8612-1746a5000029&mac=FC:F5:C4:BA:FE:CB&cycle_type=5min&start_date=${startDateStr}&end_date=${endDateStr}&call_back=outdoor.temperature,outdoor.humidity,wind.wind_speed,rainfall.daily&temp_unitid=1&wind_speed_unitid=7&rainfall_unitid=12`;
+
+    try {
+        const res = await fetch(HIST_URL);
+        const json = await res.json();
+        if (json.code === 0 && json.data) {
+            updateRealChart(json.data);
+            // Change note text
+            document.querySelector('.sys-note').textContent = "* Showing REAL historical trends (Last 60 mins).";
+        }
+    } catch (e) {
+        console.error("Failed to fetch historical data", e);
     }
+}
+
+function updateRealChart(data) {
+    const ctx = document.getElementById('weatherChart').getContext('2d');
+    
+    // We assume all lists have the same keys (timestamps)
+    const timestamps = Object.keys(data.outdoor.temperature.list).sort();
+    
+    const labels = timestamps.map(ts => {
+        const d = new Date(parseInt(ts) * 1000);
+        return `${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
+    });
+
+    const tempData = timestamps.map(ts => parseFloat(data.outdoor.temperature.list[ts] || 0));
+    const humData = timestamps.map(ts => parseFloat(data.outdoor.humidity.list[ts] || 0));
+    const windData = timestamps.map(ts => parseFloat(data.wind.wind_speed.list[ts] || 0));
+    const rainData = timestamps.map(ts => parseFloat(data.rainfall.daily.list[ts] || 0));
 
     if (!weatherChart) {
         Chart.defaults.color = '#888';
@@ -152,45 +161,78 @@ function updateChart(liveTemp) {
         weatherChart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: simulatedLabels,
-                datasets: [{
-                    label: 'Temperature (°C)',
-                    data: simulatedData,
-                    borderColor: '#00ff41',
-                    backgroundColor: 'rgba(0, 255, 65, 0.1)',
-                    borderWidth: 2,
-                    pointBackgroundColor: '#000',
-                    pointBorderColor: '#00ff41',
-                    pointHoverBackgroundColor: '#00ff41',
-                    pointHoverBorderColor: '#fff',
-                    fill: true,
-                    tension: 0.4
-                }]
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Temp (°C)',
+                        data: tempData,
+                        borderColor: '#ff003c',
+                        backgroundColor: 'rgba(255, 0, 60, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: 'Hum (%)',
+                        data: humData,
+                        borderColor: '#00ffff',
+                        backgroundColor: 'rgba(0, 255, 255, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        yAxisID: 'y1'
+                    },
+                    {
+                        label: 'Wind (km/h)',
+                        data: windData,
+                        borderColor: '#00ff41',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: 'Rain (mm)',
+                        data: rainData,
+                        borderColor: '#0055ff',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        yAxisID: 'y'
+                    }
+                ]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 scales: {
                     y: {
-                        beginAtZero: false,
-                        grid: {
-                            color: '#333'
-                        }
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        grid: { color: '#333' }
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        grid: { drawOnChartArea: false },
                     },
                     x: {
-                        grid: {
-                            color: '#333'
-                        }
+                        grid: { color: '#333' }
                     }
                 },
                 plugins: {
                     legend: {
-                        display: false
+                        display: true,
+                        labels: { color: '#ccc' }
                     }
                 }
             }
         });
     } else {
+        weatherChart.data.labels = labels;
+        weatherChart.data.datasets[0].data = tempData;
+        weatherChart.data.datasets[1].data = humData;
+        weatherChart.data.datasets[2].data = windData;
+        weatherChart.data.datasets[3].data = rainData;
         weatherChart.update();
     }
 }
