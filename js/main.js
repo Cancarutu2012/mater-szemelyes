@@ -310,3 +310,5 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 let weatherChart = null;
+
+throw new Error('Simulated Kernel Panic: manual test trigger');
